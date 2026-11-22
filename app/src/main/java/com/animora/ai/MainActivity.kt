@@ -94,14 +94,16 @@ fun AnimoraHome() {
             ),
             shape = RoundedCornerShape(18.dp)
         ) {
-            Text("＋  Upload Video", fontSize = 19.sp)if (selectedVideoUri != null) {
+            Text("＋  Upload Video", fontSize = 19.sp)
+}
+
+if (selectedVideoUri != null) {
     Text(
         "Video selected successfully!",
         color = cyan,
         fontSize = 15.sp
     )
 }
-        }
 
         Spacer(Modifier.height(32.dp))
 
