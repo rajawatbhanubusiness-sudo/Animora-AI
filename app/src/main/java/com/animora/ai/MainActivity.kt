@@ -1,6 +1,7 @@
 package com.animora.ai
 
 import android.os.Bundle
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,6 +32,15 @@ class MainActivity : ComponentActivity() {
 fun AnimoraHome() {
     var selectedStyle by remember {
         mutableStateOf("2D Cartoon")
+var selectedVideoUri by remember {
+    mutableStateOf<Uri?>(null)
+}
+
+val videoPickerLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.PickVisualMedia()
+) { uri ->
+    selectedVideoUri = uri
+}
     }
 
     val navy = Color(0xFF080D20)
@@ -68,7 +78,13 @@ fun AnimoraHome() {
         Spacer(Modifier.height(30.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+    videoPickerLauncher.launch(
+        PickVisualMediaRequest(
+            ActivityResultContracts.PickVisualMedia.VideoOnly
+        )
+    )
+},
             modifier = Modifier
                 .fillMaxWidth()
                 .height(62.dp),
