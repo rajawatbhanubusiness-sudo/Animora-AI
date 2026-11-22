@@ -30,17 +30,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AnimoraHome() {
-    var selectedStyle by remember {
+     var selectedStyle by remember {
         mutableStateOf("2D Cartoon")
-var selectedVideoUri by remember {
-    mutableStateOf<Uri?>(null)
-}
+    }
 
-val videoPickerLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.PickVisualMedia()
-) { uri ->
-    selectedVideoUri = uri
-}
+    var selectedVideoUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        selectedVideoUri = uri
     }
 
     val navy = Color(0xFF080D20)
