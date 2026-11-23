@@ -1,6 +1,7 @@
 package com.animora.ai
 
 import android.os.Bundle
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -46,6 +47,9 @@ var customStylePrompt by remember {
     }
 var extractedFrameCount by remember {
     mutableIntStateOf(0)
+}
+var extractedFrames by remember {
+    mutableStateOf<List<Bitmap>>(emptyList())
 }
 
 var isProcessing by remember {
