@@ -137,8 +137,18 @@ Button(
                 val frames = withContext(Dispatchers.IO) {
     VideoProcessor.extractFrames(context, videoUri)
 }
-extractedFrames = frames
-extractedFrameCount = frames.size
+val processedFrames = withContext(Dispatchers.Default) {
+    if (selectedStyle.contains("Pixel Art")) {
+        frames.map { frame ->
+            ImageStylizer.applyPixelArt(frame)
+        }
+    } else {
+        frames
+    }
+}
+
+extractedFrames = processedFrames
+extractedFrameCount = processedFrames.size
                 isProcessing = false
             }
         }
