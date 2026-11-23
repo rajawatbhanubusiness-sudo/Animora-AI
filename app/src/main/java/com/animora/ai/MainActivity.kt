@@ -57,6 +57,8 @@ var isProcessing by remember {
     ) { uri ->
         selectedVideoUri = uri
     }
+val context = LocalContext.current
+val scope = rememberCoroutineScope()
 
     val navy = Color(0xFF080D20)
     val purple = Color(0xFF873CFF)
