@@ -171,6 +171,29 @@ if (isProcessing) {
         modifier = Modifier.align(Alignment.CenterHorizontally)
     )
 }
+
+if (extractedFrames.isNotEmpty()) {
+    Spacer(Modifier.height(16.dp))
+
+    Text(
+        "Processed Frame Preview",
+        color = cyan,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(Modifier.height(12.dp))
+
+    Image(
+        bitmap = extractedFrames.first().asImageBitmap(),
+        contentDescription = "First processed video frame",
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 280.dp),
+        contentScale = ContentScale.Fit
+    )
+}
+
         Spacer(Modifier.height(32.dp))
 
         Text(
