@@ -154,6 +154,34 @@ if (extractedFrameCount > 0) {
         color = cyan
     )
 }
+if (extractedFrames.isNotEmpty()) {
+    Spacer(Modifier.height(12.dp))
+
+    Text(
+        "Frame Preview",
+        color = Color.White,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold
+    )
+
+    extractedFrames.forEachIndexed { index, bitmap ->
+        Text(
+            "Frame ${index + 1}",
+            color = cyan
+        )
+
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = "Extracted video frame ${index + 1}",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp),
+            contentScale = ContentScale.Fit
+        )
+
+        Spacer(Modifier.height(12.dp))
+    }
+}
 
         Spacer(Modifier.height(32.dp))
 
