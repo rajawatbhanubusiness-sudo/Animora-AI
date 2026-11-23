@@ -115,31 +115,42 @@ if (selectedVideoUri != null) {
         )
 
         Spacer(Modifier.height(15.dp))
+val animationStyles = listOf(
+    "🎌 Anime",
+    "🎬 3D Cartoon",
+    "🎨 2D Cartoon",
+    "🖌️ Watercolor",
+    "🧱 Clay Animation",
+    "💥 Comic Book",
+    "👾 Pixel Art",
+    "🎥 Realistic Animation",
+    "🧙 Fantasy Animation",
+    "📺 Vintage Cartoon",
+    "✂️ Paper Cutout",
+    "🌃 Cyberpunk"
+)
 
-        listOf("2D Cartoon", "3D Animation").forEach {
-            Card(
-                onClick = { selectedStyle = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 7.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (selectedStyle == it)
-                        Color(0xFF302052)
-                    else Color(0xFF17203A)
-                ),
-                shape = RoundedCornerShape(18.dp)
-            ) {
-                Text(
-                    text = if (it == "2D Cartoon")
-                        "🎨   2D Cartoon"
-                    else "🎬   3D Animation",
-                    color = Color.White,
-                    fontSize = 19.sp,
-                    modifier = Modifier.padding(22.dp)
-                )
-            }
-        }
-
+animationStyles.forEach { style ->
+    Card(
+        onClick = { selectedStyle = style },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (selectedStyle == style)
+                Color(0xFF302052)
+            else Color(0xFF17203A)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(
+            text = style,
+            color = Color.White,
+            fontSize = 17.sp,
+            modifier = Modifier.padding(18.dp)
+        )
+    }
+}
         Spacer(Modifier.height(30.dp))
 
         Text(
