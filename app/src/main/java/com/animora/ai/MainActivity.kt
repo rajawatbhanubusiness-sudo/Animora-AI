@@ -145,8 +145,7 @@ extractedFrameCount = frames.size
     },
     enabled = selectedVideoUri != null && !isProcessing
 ) {
-    Text(if (isProcessing) "Extracting Frames..." else "Extract Video Frames")
-}
+    Text(if (isProcessing) "Preparing Video..." else "Prepare Video")
     
         Spacer(Modifier.height(32.dp))
 
