@@ -33,7 +33,9 @@ fun AnimoraHome() {
      var selectedStyle by remember {
         mutableStateOf("2D Cartoon")
     }
-
+var customStylePrompt by remember {
+    mutableStateOf("")
+}
     var selectedVideoUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -152,7 +154,24 @@ animationStyles.forEach { style ->
     }
 }
         Spacer(Modifier.height(30.dp))
+Text(
+    "✨ Custom Animation Style",
+    color = Color.White,
+    fontSize = 21.sp,
+    fontWeight = FontWeight.Bold
+)
 
+Spacer(Modifier.height(12.dp))
+
+OutlinedTextField(
+    value = customStylePrompt,
+    onValueChange = { customStylePrompt = it },
+    placeholder = {
+        Text("Describe your own animation style...")
+    },
+    modifier = Modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(16.dp)
+)
         Text(
             "Recent Projects",
             color = Color.White,
