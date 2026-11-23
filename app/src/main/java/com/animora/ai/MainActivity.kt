@@ -147,10 +147,7 @@ extractedFrameCount = frames.size
 ) {
     Text(if (isProcessing) "Extracting Frames..." else "Extract Video Frames")
 }
-        Spacer(Modifier.height(12.dp))
-    }
-}
-
+    
         Spacer(Modifier.height(32.dp))
 
         Text(
