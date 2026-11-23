@@ -148,15 +148,6 @@ extractedFrameCount = frames.size
     Text(if (isProcessing) "Extracting Frames..." else "Extract Video Frames")
 }
 
-if (extractedFrameCount > 0) {
-    Text(
-        "Frames extracted: $extractedFrameCount",
-        color = cyan
-    )
-}
-if (extractedFrames.isNotEmpty()) {
-    Spacer(Modifier.height(12.dp))
-
     Text(
         "Frame Preview",
         color = Color.White,
