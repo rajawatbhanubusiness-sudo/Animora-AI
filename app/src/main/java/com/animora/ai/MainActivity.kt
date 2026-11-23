@@ -147,6 +147,20 @@ extractedFrameCount = frames.size
 ) {
     Text(if (isProcessing) "Preparing Video..." else "Prepare Video")
     }
+if (isProcessing) {
+    Spacer(Modifier.height(12.dp))
+
+    CircularProgressIndicator(
+        color = cyan,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
+    )
+
+    Text(
+        "Preparing your video...",
+        color = cyan,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
+    )
+}
         Spacer(Modifier.height(32.dp))
 
         Text(
