@@ -44,6 +44,13 @@ var customStylePrompt by remember {
     var selectedVideoUri by remember {
         mutableStateOf<Uri?>(null)
     }
+var extractedFrameCount by remember {
+    mutableIntStateOf(0)
+}
+
+var isProcessing by remember {
+    mutableStateOf(false)
+}
 
     val videoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
