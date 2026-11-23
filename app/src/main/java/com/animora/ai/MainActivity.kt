@@ -131,9 +131,11 @@ Button(
         if (videoUri != null) {
             scope.launch {
                 isProcessing = true
-                extractedFrameCount = withContext(Dispatchers.IO) {
-                    VideoProcessor.extractFrames(context, videoUri).size
-                }
+                val frames = withContext(Dispatchers.IO) {
+    VideoProcessor.extractFrames(context, videoUri)
+}
+extractedFrames = frames
+extractedFrameCount = frames.size
                 isProcessing = false
             }
         }
