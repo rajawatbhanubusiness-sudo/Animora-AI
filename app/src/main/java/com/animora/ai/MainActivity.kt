@@ -56,6 +56,7 @@ var customStylePrompt by remember {
         modifier = Modifier
             .fillMaxSize()
             .background(navy)
+            .verticalScroll(rememberScrollState())
             .padding(22.dp)
     ) {
         Text(
