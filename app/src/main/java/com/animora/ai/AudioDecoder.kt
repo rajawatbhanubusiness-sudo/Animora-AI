@@ -17,7 +17,6 @@ data class DecodedAudio(
 
 object AudioDecoder {
 
-    private const val TARGET_SAMPLE_RATE = 11025
     private const val MAX_DURATION_MS = 600000L
 
     fun decode(
@@ -75,8 +74,6 @@ object AudioDecoder {
 
             var inputFinished = false
             var outputFinished = false
-            var frameIndex = 0L
-            var nextSampleFrame = 0.0
 
             while (!outputFinished) {
 
@@ -118,6 +115,7 @@ object AudioDecoder {
                         sampleRate = format.getInteger(
                             MediaFormat.KEY_SAMPLE_RATE
                         )
+
                         channelCount = format.getInteger(
                             MediaFormat.KEY_CHANNEL_COUNT
                         )
@@ -136,6 +134,7 @@ object AudioDecoder {
                             val buffer = codec.getOutputBuffer(outputIndex)
 
                             if (buffer != null && info.size > 0) {
+
                                 if (sampleRate <= 0 || channelCount <= 0) {
                                     return null
                                 }
@@ -160,10 +159,6 @@ object AudioDecoder {
                                     channelCount * bytesPerSample
 
                                 val frameCount = info.size / frameBytes
-                                val step = (
-                                    sampleRate.toDouble() /
-                                    TARGET_SAMPLE_RATE
-                                ).coerceAtLeast(1.0)
 
                                 for (frame in 0 until frameCount) {
                                     var total = 0.0
@@ -181,20 +176,14 @@ object AudioDecoder {
                                         total += value
                                     }
 
-                                    if (frameIndex.toDouble() >= nextSampleFrame) {
-                                        val mono = total / channelCount
+                                    val mono = total / channelCount
 
-                                        output.add(
-                                            (mono * 32767.0)
-                                                .toInt()
-                                                .coerceIn(-32768, 32767)
-                                                .toShort()
-                                        )
-
-                                        nextSampleFrame += step
-                                    }
-
-                                    frameIndex++
+                                    output.add(
+                                        (mono.coerceIn(-1.0, 1.0) * 32767.0)
+                                            .toInt()
+                                            .coerceIn(-32768, 32767)
+                                            .toShort()
+                                    )
                                 }
                             }
 
@@ -215,7 +204,7 @@ object AudioDecoder {
 
             return DecodedAudio(
                 samples = output.toShortArray(),
-                sampleRate = TARGET_SAMPLE_RATE,
+                sampleRate = sampleRate,
                 durationMs = durationMs
             )
 
