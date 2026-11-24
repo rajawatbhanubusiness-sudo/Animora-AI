@@ -1,3 +1,4 @@
+
 package com.animora.ai
 
 import android.os.Bundle
@@ -28,9 +29,11 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             AnimoraHome()
         }
@@ -39,59 +42,61 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AnimoraHome() {
-     var selectedStyle by remember {
+
+    var selectedStyle by remember {
         mutableStateOf("2D Cartoon")
     }
-var customStylePrompt by remember {
-    mutableStateOf("")
-}
+
+    var customStylePrompt by remember {
+        mutableStateOf("")
+    }
+
     var selectedVideoUri by remember {
         mutableStateOf<Uri?>(null)
     }
-var selectedAudioUri by remember {
-    mutableStateOf<Uri?>(null)
-}
-var audioDurationMs by remember {
-    mutableStateOf<Long?>(null)
-}
-var extractedFrameCount by remember {
-    mutableIntStateOf(0)
-}
-var extractedFrames by remember {
-    mutableStateOf<List<Bitmap>>(emptyList())
-}
 
-var isProcessing by remember {
-    mutableStateOf(false)
-}
-
-    val videoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        selectedVideoUri = uri
+    var extractedFrameCount by remember {
+        mutableIntStateOf(0)
     }
-val audioPickerLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.GetContent()
-) { uri ->
-    selectedAudioUri = uri
-}
-val context = LocalContext.current
-val scope = rememberCoroutineScope()
-LaunchedEffect(selectedAudioUri) {
-    val audioUri = selectedAudioUri
 
-    audioDurationMs = if (audioUri != null) {
-        withContext(Dispatchers.IO) {
-            AudioProcessor.getAudioDurationMs(context, audioUri)
+    var extractedFrames by remember {
+        mutableStateOf<List<Bitmap>>(emptyList())
+    }
+
+    var isProcessing by remember {
+        mutableStateOf(false)
+    }
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val videoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+            selectedVideoUri = uri
+            extractedFrames = emptyList()
+            extractedFrameCount = 0
         }
-    } else {
-        null
-    }
-}
 
     val navy = Color(0xFF080D20)
     val purple = Color(0xFF873CFF)
     val cyan = Color(0xFF00CFFF)
+
+    val animationStyles = listOf(
+        "🎌 Anime",
+        "🎬 3D Cartoon",
+        "🎨 2D Cartoon",
+        "🖌️ Watercolor",
+        "🧱 Clay Animation",
+        "💥 Comic Book",
+        "👾 Pixel Art",
+        "🎥 Realistic Animation",
+        "🧙 Fantasy Animation",
+        "📺 Vintage Cartoon",
+        "✂️ Paper Cutout",
+        "🌃 Cyberpunk"
+    )
 
     Column(
         modifier = Modifier
@@ -100,6 +105,7 @@ LaunchedEffect(selectedAudioUri) {
             .verticalScroll(rememberScrollState())
             .padding(22.dp)
     ) {
+
         Text(
             "ANIMORA AI",
             color = cyan,
@@ -126,12 +132,12 @@ LaunchedEffect(selectedAudioUri) {
 
         Button(
             onClick = {
-    videoPickerLauncher.launch(
-        PickVisualMediaRequest(
-            ActivityResultContracts.PickVisualMedia.VideoOnly
-        )
-    )
-},
+                videoPickerLauncher.launch(
+                    PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.VideoOnly
+                    )
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(62.dp),
@@ -140,103 +146,113 @@ LaunchedEffect(selectedAudioUri) {
             ),
             shape = RoundedCornerShape(18.dp)
         ) {
-            Text("＋  Upload Video", fontSize = 19.sp)
-}
-
-if (selectedVideoUri != null) {
-    Text(
-        "Video selected successfully!",
-        color = cyan,
-        fontSize = 15.sp
-    )
-}
-if (selectedStyle.contains("Music-to-AI Animation")) {
-    Spacer(Modifier.height(16.dp))
-
-    Button(
-        onClick = {
-            audioPickerLauncher.launch("audio/*")
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("🎵 Upload Song")
-    }
-
-    if (selectedAudioUri != null) {
-        Text(
-            "Song selected successfully!",
-            color = cyan
-        )
-
-        if (audioDurationMs != null) {
             Text(
-                "Song duration: ${audioDurationMs!! / 1000} seconds",
-                color = cyan
+                "＋  Upload Video",
+                fontSize = 19.sp
             )
         }
-    }
-}
-Button(
-    onClick = {
-        val videoUri = selectedVideoUri
-        if (videoUri != null) {
-            scope.launch {
-                isProcessing = true
-                val frames = withContext(Dispatchers.IO) {
-    VideoProcessor.extractFrames(context, videoUri)
-}
-val processedFrames = withContext(Dispatchers.Default) {
-    frames.map { frame ->
-        ImageStylizer.applyStyle(frame, selectedStyle)
-    }
-}
 
-extractedFrames = processedFrames
-extractedFrameCount = processedFrames.size
-                isProcessing = false
-            }
+        if (selectedVideoUri != null) {
+            Text(
+                "Video selected successfully!",
+                color = cyan,
+                fontSize = 15.sp
+            )
         }
-    },
-    enabled = selectedVideoUri != null && !isProcessing
-) {
-    Text(if (isProcessing) "Preparing Video..." else "Prepare Video")
-    }
-if (isProcessing) {
-    Spacer(Modifier.height(12.dp))
 
-    CircularProgressIndicator(
-        color = cyan,
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-    )
+        Spacer(Modifier.height(16.dp))
 
-    Text(
-        "Preparing your video...",
-        color = cyan,
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-    )
-}
+        Button(
+            onClick = {
+                val videoUri = selectedVideoUri
 
-if (extractedFrames.isNotEmpty()) {
-    Spacer(Modifier.height(16.dp))
+                if (videoUri != null) {
+                    scope.launch {
+                        isProcessing = true
 
-    Text(
-        "Processed Frame Preview",
-        color = cyan,
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold
-    )
+                        try {
+                            val frames = withContext(Dispatchers.IO) {
+                                VideoProcessor.extractFrames(
+                                    context,
+                                    videoUri
+                                )
+                            }
 
-    Spacer(Modifier.height(12.dp))
+                            val processedFrames =
+                                withContext(Dispatchers.Default) {
+                                    frames.map { frame ->
+                                        ImageStylizer.applyStyle(
+                                            frame,
+                                            selectedStyle
+                                        )
+                                    }
+                                }
 
-    Image(
-        bitmap = extractedFrames.first().asImageBitmap(),
-        contentDescription = "First processed video frame",
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 280.dp),
-        contentScale = ContentScale.Fit
-    )
-}
+                            extractedFrames = processedFrames
+                            extractedFrameCount = processedFrames.size
+
+                        } finally {
+                            isProcessing = false
+                        }
+                    }
+                }
+            },
+            enabled = selectedVideoUri != null && !isProcessing
+        ) {
+            Text(
+                if (isProcessing) {
+                    "Preparing Video..."
+                } else {
+                    "Prepare Video"
+                }
+            )
+        }
+
+        if (isProcessing) {
+            Spacer(Modifier.height(12.dp))
+
+            CircularProgressIndicator(
+                color = cyan,
+                modifier = Modifier.align(
+                    Alignment.CenterHorizontally
+                )
+            )
+
+            Text(
+                "Preparing your video...",
+                color = cyan,
+                modifier = Modifier.align(
+                    Alignment.CenterHorizontally
+                )
+            )
+        }
+
+        if (extractedFrames.isNotEmpty()) {
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                "Processed Frame Preview",
+                color = cyan,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Image(
+                bitmap = extractedFrames.first().asImageBitmap(),
+                contentDescription = "First processed video frame",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 280.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Text(
+                "Processed frames: $extractedFrameCount",
+                color = Color.LightGray
+            )
+        }
 
         Spacer(Modifier.height(32.dp))
 
@@ -248,62 +264,62 @@ if (extractedFrames.isNotEmpty()) {
         )
 
         Spacer(Modifier.height(15.dp))
-val animationStyles = listOf(
-    "🎌 Anime",
-    "🎬 3D Cartoon",
-    "🎨 2D Cartoon",
-    "🖌️ Watercolor",
-    "🧱 Clay Animation",
-    "💥 Comic Book",
-    "👾 Pixel Art",
-    "🎥 Realistic Animation",
-    "🧙 Fantasy Animation",
-    "📺 Vintage Cartoon",
-    "✂️ Paper Cutout",
-    "🌃 Cyberpunk",
-    "🎵 Music-to-AI Animation"
-)
 
-animationStyles.forEach { style ->
-    Card(
-        onClick = { selectedStyle = style },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (selectedStyle == style)
-                Color(0xFF302052)
-            else Color(0xFF17203A)
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Text(
-            text = style,
-            color = Color.White,
-            fontSize = 17.sp,
-            modifier = Modifier.padding(18.dp)
-        )
-    }
-}
+        animationStyles.forEach { style ->
+
+            Card(
+                onClick = {
+                    selectedStyle = style
+                    extractedFrames = emptyList()
+                    extractedFrameCount = 0
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor =
+                        if (selectedStyle == style) {
+                            Color(0xFF302052)
+                        } else {
+                            Color(0xFF17203A)
+                        }
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = style,
+                    color = Color.White,
+                    fontSize = 17.sp,
+                    modifier = Modifier.padding(18.dp)
+                )
+            }
+        }
+
         Spacer(Modifier.height(30.dp))
-Text(
-    "✨ Custom Animation Style",
-    color = Color.White,
-    fontSize = 21.sp,
-    fontWeight = FontWeight.Bold
-)
 
-Spacer(Modifier.height(12.dp))
+        Text(
+            "✨ Custom Animation Style",
+            color = Color.White,
+            fontSize = 21.sp,
+            fontWeight = FontWeight.Bold
+        )
 
-OutlinedTextField(
-    value = customStylePrompt,
-    onValueChange = { customStylePrompt = it },
-    placeholder = {
-        Text("Describe your own animation style...")
-    },
-    modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(16.dp)
-)
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = customStylePrompt,
+            onValueChange = {
+                customStylePrompt = it
+            },
+            placeholder = {
+                Text("Describe your own animation style...")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
+        )
+
+        Spacer(Modifier.height(25.dp))
+
         Text(
             "Recent Projects",
             color = Color.White,
@@ -318,12 +334,14 @@ OutlinedTextField(
             color = Color.LightGray
         )
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(30.dp))
 
         Text(
             "HOME       PROJECTS       PROFILE",
             color = cyan,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(
+                Alignment.CenterHorizontally
+            )
         )
     }
 }
