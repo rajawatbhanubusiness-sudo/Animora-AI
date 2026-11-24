@@ -48,6 +48,9 @@ var customStylePrompt by remember {
     var selectedVideoUri by remember {
         mutableStateOf<Uri?>(null)
     }
+var selectedAudioUri by remember {
+    mutableStateOf<Uri?>(null)
+}
 var extractedFrameCount by remember {
     mutableIntStateOf(0)
 }
@@ -64,6 +67,11 @@ var isProcessing by remember {
     ) { uri ->
         selectedVideoUri = uri
     }
+val audioPickerLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.GetContent()
+) { uri ->
+    selectedAudioUri = uri
+}
 val context = LocalContext.current
 val scope = rememberCoroutineScope()
 
@@ -127,6 +135,25 @@ if (selectedVideoUri != null) {
         color = cyan,
         fontSize = 15.sp
     )
+}
+if (selectedStyle.contains("Music-to-AI Animation")) {
+    Spacer(Modifier.height(16.dp))
+
+    Button(
+        onClick = {
+            audioPickerLauncher.launch("audio/*")
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("🎵 Upload Song")
+    }
+
+    if (selectedAudioUri != null) {
+        Text(
+            "Song selected successfully!",
+            color = cyan
+        )
+    }
 }
 Button(
     onClick = {
