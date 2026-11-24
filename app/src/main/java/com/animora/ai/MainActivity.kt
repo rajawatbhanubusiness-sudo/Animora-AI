@@ -167,6 +167,13 @@ if (selectedStyle.contains("Music-to-AI Animation")) {
             "Song selected successfully!",
             color = cyan
         )
+
+        if (audioDurationMs != null) {
+            Text(
+                "Song duration: ${audioDurationMs!! / 1000} seconds",
+                color = cyan
+            )
+        }
     }
 }
 if (audioDurationMs != null) {
