@@ -7,6 +7,7 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import java.nio.ByteOrder
 
 data class DecodedAudio(
@@ -26,9 +27,16 @@ object AudioDecoder {
 
         val extractor = MediaExtractor()
         var codec: MediaCodec? = null
+        var audioFileDescriptor: ParcelFileDescriptor? = null
 
         try {
-            extractor.setDataSource(context, audioUri)
+            audioFileDescriptor =
+                context.contentResolver.openFileDescriptor(audioUri, "r")
+                    ?: return null
+
+            extractor.setDataSource(
+                audioFileDescriptor!!.fileDescriptor
+            )
 
             var audioTrack = -1
 
@@ -81,8 +89,9 @@ object AudioDecoder {
                     val inputIndex = codec.dequeueInputBuffer(10000)
 
                     if (inputIndex >= 0) {
-                        val inputBuffer = codec.getInputBuffer(inputIndex)
-                            ?: return null
+                        val inputBuffer =
+                            codec.getInputBuffer(inputIndex)
+                                ?: return null
 
                         inputBuffer.clear()
 
@@ -92,22 +101,30 @@ object AudioDecoder {
 
                         if (sampleSize < 0) {
                             codec.queueInputBuffer(
-                                inputIndex, 0, 0, 0L,
+                                inputIndex,
+                                0,
+                                0,
+                                0L,
                                 MediaCodec.BUFFER_FLAG_END_OF_STREAM
                             )
                             inputFinished = true
                         } else {
                             codec.queueInputBuffer(
-                                inputIndex, 0, sampleSize,
-                                extractor.sampleTime, 0
+                                inputIndex,
+                                0,
+                                sampleSize,
+                                extractor.sampleTime,
+                                0
                             )
                             extractor.advance()
                         }
                     }
                 }
 
-                when (val outputIndex =
-                    codec.dequeueOutputBuffer(info, 10000)) {
+                when (
+                    val outputIndex =
+                        codec.dequeueOutputBuffer(info, 10000)
+                ) {
 
                     MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
                         val format = codec.outputFormat
@@ -120,7 +137,11 @@ object AudioDecoder {
                             MediaFormat.KEY_CHANNEL_COUNT
                         )
 
-                        if (format.containsKey(MediaFormat.KEY_PCM_ENCODING)) {
+                        if (
+                            format.containsKey(
+                                MediaFormat.KEY_PCM_ENCODING
+                            )
+                        ) {
                             pcmEncoding = format.getInteger(
                                 MediaFormat.KEY_PCM_ENCODING
                             )
@@ -131,17 +152,23 @@ object AudioDecoder {
 
                     else -> {
                         if (outputIndex >= 0) {
-                            val buffer = codec.getOutputBuffer(outputIndex)
+                            val buffer =
+                                codec.getOutputBuffer(outputIndex)
 
                             if (buffer != null && info.size > 0) {
 
-                                if (sampleRate <= 0 || channelCount <= 0) {
+                                if (
+                                    sampleRate <= 0 ||
+                                    channelCount <= 0
+                                ) {
                                     return null
                                 }
 
                                 if (
-                                    pcmEncoding != AudioFormat.ENCODING_PCM_16BIT &&
-                                    pcmEncoding != AudioFormat.ENCODING_PCM_FLOAT
+                                    pcmEncoding !=
+                                    AudioFormat.ENCODING_PCM_16BIT &&
+                                    pcmEncoding !=
+                                    AudioFormat.ENCODING_PCM_FLOAT
                                 ) {
                                     return null
                                 }
@@ -151,26 +178,31 @@ object AudioDecoder {
                                 buffer.order(ByteOrder.nativeOrder())
 
                                 val bytesPerSample =
-                                    if (pcmEncoding ==
+                                    if (
+                                        pcmEncoding ==
                                         AudioFormat.ENCODING_PCM_FLOAT
                                     ) 4 else 2
 
                                 val frameBytes =
                                     channelCount * bytesPerSample
 
-                                val frameCount = info.size / frameBytes
+                                val frameCount =
+                                    info.size / frameBytes
 
                                 for (frame in 0 until frameCount) {
                                     var total = 0.0
 
                                     for (channel in 0 until channelCount) {
-                                        val value =
-                                            if (pcmEncoding ==
+
+                                        val value: Double =
+                                            if (
+                                                pcmEncoding ==
                                                 AudioFormat.ENCODING_PCM_FLOAT
                                             ) {
-                                                buffer.getFloat()
+                                                buffer.getFloat().toDouble()
                                             } else {
-                                                buffer.getShort() / 32768.0
+                                                buffer.getShort().toDouble() /
+                                                    32768.0
                                             }
 
                                         total += value
@@ -178,12 +210,14 @@ object AudioDecoder {
 
                                     val mono = total / channelCount
 
-                                    output.add(
-                                        (mono.coerceIn(-1.0, 1.0) * 32767.0)
+                                    val shortValue =
+                                        (mono.coerceIn(-1.0, 1.0) *
+                                            32767.0)
                                             .toInt()
                                             .coerceIn(-32768, 32767)
                                             .toShort()
-                                    )
+
+                                    output.add(shortValue)
                                 }
                             }
 
@@ -194,7 +228,9 @@ object AudioDecoder {
                                 outputFinished = true
                             }
 
-                            codec.releaseOutputBuffer(outputIndex, false)
+                            codec.releaseOutputBuffer(
+                                outputIndex, false
+                            )
                         }
                     }
                 }
@@ -211,18 +247,32 @@ object AudioDecoder {
         } catch (e: Exception) {
             e.printStackTrace()
             return null
+
         } finally {
             try {
                 codec?.stop()
             } catch (_: Exception) {
             }
 
-            codec?.release()
-            extractor.release()
+            try {
+                codec?.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                extractor.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                audioFileDescriptor?.close()
+            } catch (_: Exception) {
+            }
         }
     }
 
     private class ShortArrayBuilder {
+
         private var data = ShortArray(4096)
         private var size = 0
 
