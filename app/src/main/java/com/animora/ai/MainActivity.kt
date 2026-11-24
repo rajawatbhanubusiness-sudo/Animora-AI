@@ -138,12 +138,8 @@ Button(
     VideoProcessor.extractFrames(context, videoUri)
 }
 val processedFrames = withContext(Dispatchers.Default) {
-    if (selectedStyle.contains("Pixel Art")) {
-        frames.map { frame ->
-            ImageStylizer.applyPixelArt(frame)
-        }
-    } else {
-        frames
+    frames.map { frame ->
+        ImageStylizer.applyStyle(frame, selectedStyle)
     }
 }
 
