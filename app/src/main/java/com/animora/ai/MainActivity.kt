@@ -213,6 +213,7 @@ val animationStyles = listOf(
     "📺 Vintage Cartoon",
     "✂️ Paper Cutout",
     "🌃 Cyberpunk"
+    "🎵 Music-to-AI Animation"
 )
 
 animationStyles.forEach { style ->
