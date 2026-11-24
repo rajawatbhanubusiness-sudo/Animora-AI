@@ -51,6 +51,9 @@ var customStylePrompt by remember {
 var selectedAudioUri by remember {
     mutableStateOf<Uri?>(null)
 }
+var audioDurationMs by remember {
+    mutableStateOf<Long?>(null)
+}
 var extractedFrameCount by remember {
     mutableIntStateOf(0)
 }
@@ -74,6 +77,17 @@ val audioPickerLauncher = rememberLauncherForActivityResult(
 }
 val context = LocalContext.current
 val scope = rememberCoroutineScope()
+LaunchedEffect(selectedAudioUri) {
+    val audioUri = selectedAudioUri
+
+    audioDurationMs = if (audioUri != null) {
+        withContext(Dispatchers.IO) {
+            AudioProcessor.getAudioDurationMs(context, audioUri)
+        }
+    } else {
+        null
+    }
+}
 
     val navy = Color(0xFF080D20)
     val purple = Color(0xFF873CFF)
@@ -154,6 +168,12 @@ if (selectedStyle.contains("Music-to-AI Animation")) {
             color = cyan
         )
     }
+}
+if (audioDurationMs != null) {
+    Text(
+        "Song duration: ${audioDurationMs!! / 1000} seconds",
+        color = cyan
+    )
 }
 Button(
     onClick = {
