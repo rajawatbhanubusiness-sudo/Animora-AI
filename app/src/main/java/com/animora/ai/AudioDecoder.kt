@@ -76,7 +76,7 @@ object AudioDecoder {
             var inputFinished = false
             var outputFinished = false
             var frameIndex = 0L
-            var nextOutputFrame = 0L
+            var nextSampleFrame = 0.0
 
             while (!outputFinished) {
 
@@ -95,20 +95,14 @@ object AudioDecoder {
 
                         if (sampleSize < 0) {
                             codec.queueInputBuffer(
-                                inputIndex,
-                                0,
-                                0,
-                                0L,
+                                inputIndex, 0, 0, 0L,
                                 MediaCodec.BUFFER_FLAG_END_OF_STREAM
                             )
                             inputFinished = true
                         } else {
                             codec.queueInputBuffer(
-                                inputIndex,
-                                0,
-                                sampleSize,
-                                extractor.sampleTime,
-                                0
+                                inputIndex, 0, sampleSize,
+                                extractor.sampleTime, 0
                             )
                             extractor.advance()
                         }
@@ -124,15 +118,11 @@ object AudioDecoder {
                         sampleRate = format.getInteger(
                             MediaFormat.KEY_SAMPLE_RATE
                         )
-
                         channelCount = format.getInteger(
                             MediaFormat.KEY_CHANNEL_COUNT
                         )
 
-                        if (format.containsKey(
-                                MediaFormat.KEY_PCM_ENCODING
-                            )
-                        ) {
+                        if (format.containsKey(MediaFormat.KEY_PCM_ENCODING)) {
                             pcmEncoding = format.getInteger(
                                 MediaFormat.KEY_PCM_ENCODING
                             )
@@ -170,29 +160,28 @@ object AudioDecoder {
                                     channelCount * bytesPerSample
 
                                 val frameCount = info.size / frameBytes
-
                                 val step = (
                                     sampleRate.toDouble() /
                                     TARGET_SAMPLE_RATE
                                 ).coerceAtLeast(1.0)
 
                                 for (frame in 0 until frameCount) {
-                                    if (frameIndex >= nextOutputFrame) {
-                                        var total = 0.0
+                                    var total = 0.0
 
-                                        for (channel in 0 until channelCount) {
-                                            val value =
-                                                if (pcmEncoding ==
-                                                    AudioFormat.ENCODING_PCM_FLOAT
-                                                ) {
-                                                    buffer.getFloat()
-                                                } else {
-                                                    buffer.getShort() / 32768.0
-                                                }
+                                    for (channel in 0 until channelCount) {
+                                        val value =
+                                            if (pcmEncoding ==
+                                                AudioFormat.ENCODING_PCM_FLOAT
+                                            ) {
+                                                buffer.getFloat()
+                                            } else {
+                                                buffer.getShort() / 32768.0
+                                            }
 
-                                            total += value
-                                        }
+                                        total += value
+                                    }
 
+                                    if (frameIndex.toDouble() >= nextSampleFrame) {
                                         val mono = total / channelCount
 
                                         output.add(
@@ -202,15 +191,7 @@ object AudioDecoder {
                                                 .toShort()
                                         )
 
-                                        nextOutputFrame =
-                                            (frameIndex + 1 +
-                                                ((nextOutputFrame -
-                                                    frameIndex) / step)
-                                                    .toLong().coerceAtLeast(0))
-                                    } else {
-                                        buffer.position(
-                                            buffer.position() + frameBytes
-                                        )
+                                        nextSampleFrame += step
                                     }
 
                                     frameIndex++
@@ -228,8 +209,6 @@ object AudioDecoder {
                         }
                     }
                 }
-
-                if (outputFinished) break
             }
 
             if (sampleRate <= 0) return null
