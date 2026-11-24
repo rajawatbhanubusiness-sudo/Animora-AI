@@ -212,7 +212,7 @@ val animationStyles = listOf(
     "🧙 Fantasy Animation",
     "📺 Vintage Cartoon",
     "✂️ Paper Cutout",
-    "🌃 Cyberpunk"
+    "🌃 Cyberpunk",
     "🎵 Music-to-AI Animation"
 )
 
